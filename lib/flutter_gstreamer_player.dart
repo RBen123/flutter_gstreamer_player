@@ -10,13 +10,14 @@ class GstPlayerTextureController {
   int textureId = 0;
   static int _id = 0;
 
-  Future<int> initialize(String pipeline) async {
+  Future<int> initialize(String pipeline, String rtmp) async {
     // No idea why, but you have to increase `_id` first before pass it to method channel,
     // if not, receiver of method channel always received 0
     GstPlayerTextureController._id = GstPlayerTextureController._id + 1;
 
     textureId = await _channel.invokeMethod('PlayerRegisterTexture', {
       'pipeline': pipeline,
+      'rtmp': rtmp,
       'playerId': GstPlayerTextureController._id,
     });
 
@@ -32,8 +33,9 @@ class GstPlayerTextureController {
 
 class GstPlayer extends StatefulWidget {
   String pipeline;
+  String rtmp;
 
-  GstPlayer({Key? key, required this.pipeline}) : super(key: key);
+  GstPlayer({Key? key, required this.pipeline, required this.rtmp}) : super(key: key);
 
   @override
   State<GstPlayer> createState() => _GstPlayerState();
@@ -59,6 +61,7 @@ class _GstPlayerState extends State<GstPlayer> {
   Future<Null> initializeController() async {
     await _controller.initialize(
       widget.pipeline,
+      widget.rtmp
     );
     setState(() {});
   }

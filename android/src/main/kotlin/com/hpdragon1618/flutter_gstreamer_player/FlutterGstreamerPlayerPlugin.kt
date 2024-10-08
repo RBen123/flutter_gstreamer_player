@@ -25,7 +25,7 @@ class FlutterGstreamerPlayerPlugin: FlutterPlugin, MethodCallHandler {
 
   private var entries: MutableList<TextureRegistry.SurfaceTextureEntry> = mutableListOf()
 
-  external fun handlePlayerRegisterTexture(pipeline: String, playerId: Int, surface: Any): Int
+  external fun handlePlayerRegisterTexture(pipeline: String, rtmp: String, playerId: Int, surface: Any): Int
 
   companion object {
     lateinit var messenger: BinaryMessenger;
@@ -55,6 +55,7 @@ class FlutterGstreamerPlayerPlugin: FlutterPlugin, MethodCallHandler {
     } else if (call.method == "PlayerRegisterTexture") {
       val arguments = call.arguments as Map<String, Any>;
       var pipeline = arguments["pipeline"] as String;
+      var rtmp = arguments["rtmp"] as String;
       var player_id = arguments["playerId"] as Int;
 
       entries.add(registry.createSurfaceTexture())
@@ -63,7 +64,7 @@ class FlutterGstreamerPlayerPlugin: FlutterPlugin, MethodCallHandler {
 
       var surface = Surface(surfaceTexture)
 
-      handlePlayerRegisterTexture(pipeline, player_id, surface);
+      handlePlayerRegisterTexture(pipeline, rtmp, player_id, surface);
 
       result.success(textureID);
     } else {

@@ -21,10 +21,11 @@ class GstPlayer {
 
     void onVideo(VideoFrameCallback callback);
 
-    void play(const gchar* pipelineString);
+    void play(const gchar* pipelineString, const gchar* rtmpString);
 
   private:
     std::string pipelineString_;
+    std::string rtmpString_;
     VideoFrameCallback video_callback_;
 
     GstElement *pipeline = nullptr;

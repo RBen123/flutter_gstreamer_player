@@ -21,11 +21,13 @@ class MyApp extends StatelessWidget {
               Expanded(
                 child: GstPlayer(
                   pipeline: pipelines[i],
+                  rtmp: "",
                 ),
               ),
               Expanded(
                 child: GstPlayer(
                   pipeline: pipelines[i+1],
+                  rtmp: "",
                 ),
               ),
             ],
@@ -42,6 +44,7 @@ class MyApp extends StatelessWidget {
               Expanded(
                 child: GstPlayer(
                   pipeline: pipelines.last,
+                  rtmp: "",
                 ),
               ),
             ],

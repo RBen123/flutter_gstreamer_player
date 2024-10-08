@@ -10,15 +10,17 @@
 #define ANATIVEWINDOW_BUFFER_FORMAT   AHARDWAREBUFFER_FORMAT_R8G8B8A8_UNORM
 
 static jint
-handle_player_register_texture(JNIEnv * env, jobject thiz, jstring pipeline, jint player_id, jobject surface) {
+handle_player_register_texture(JNIEnv * env, jobject thiz, jstring pipeline, jstring rtmp, jint player_id, jobject surface) {
   const char *pipelineString = env->GetStringUTFChars(pipeline, 0);
+  const char *rtmpString = env->GetStringUTFChars(rtmp, 0);
 
   ANativeWindow *native_window = ANativeWindow_fromSurface (env, surface);
 
   __android_log_print (ANDROID_LOG_INFO,
       LOG_TAG,
-      "pipeline: %s, player_id: %d",
+      "pipeline: %s, rtmp: %s, player_id: %d",
       pipelineString,
+      rtmpString,
       player_id);
 
   GstPlayer* gstPlayer = g_players->Get(player_id);
@@ -58,9 +60,9 @@ handle_player_register_texture(JNIEnv * env, jobject thiz, jstring pipeline, jin
     }
   );
 
-  gstPlayer->play(pipelineString);
+  gstPlayer->play(pipelineString, rtmpString);
 
-  env->ReleaseStringUTFChars(pipeline, pipelineString);
+  env->ReleaseStringUTFChars(pipeline, pipelineString, rtmp, rtmpString);
 
   return 0;
 }
