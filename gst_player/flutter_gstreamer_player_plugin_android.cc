@@ -70,7 +70,7 @@ handle_player_register_texture(JNIEnv * env, jobject thiz, jstring pipeline, jst
 
 /* List of implemented native methods */
 static JNINativeMethod native_methods[] = {
-  {"handlePlayerRegisterTexture", "(Ljava/lang/String;ILjava/lang/Object;)I",
+  {"handlePlayerRegisterTexture", "(Ljava/lang/String;ILjava/String;ILjava/lang/Object;)I",
       (void *) handle_player_register_texture},
 };
 
