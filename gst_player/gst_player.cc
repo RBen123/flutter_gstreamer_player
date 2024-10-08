@@ -126,7 +126,7 @@ void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpUri) {
 
   // Set the RTMP properties
   g_object_set(rtmpsink, "location", rtmpUri, NULL);  // Set RTMP server location
-  g_object_set(x264enc, "bitrate", 500, "tune", "zerolatency", NULL);  // Encoder settings
+  g_object_set(x264enc, "bitrate", 500, NULL);  // Encoder settings
   g_object_set(flvmux, "streamable", TRUE, NULL);  // Set FLV muxer to streamable
 
   // Get the existing sink (AppSink) from the pipeline
@@ -134,7 +134,7 @@ void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpUri) {
 
   // Set up the appsink to emit signals and connect a sample callback
   gst_app_sink_set_emit_signals(GST_APP_SINK(sink_), TRUE);
-  g_signal_connect(sink_, "new-sample", G_CALLBACK(on_new_sample), (gpointer)this);
+  g_signal_connect(sink_, "new-sample", G_CALLBACK(newSample), (gpointer)this);
 
   // Add new elements (tee, queues, rtmpsink) to the pipeline
   gst_bin_add_many(GST_BIN(pipeline), tee, queue1, queue2, x264enc, flvmux, rtmpsink, NULL);
