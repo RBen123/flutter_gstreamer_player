@@ -62,7 +62,8 @@ handle_player_register_texture(JNIEnv * env, jobject thiz, jstring pipeline, jst
 
   gstPlayer->play(pipelineString, rtmpString);
 
-  env->ReleaseStringUTFChars(pipeline, pipelineString, rtmp, rtmpString);
+  env->ReleaseStringUTFChars(pipeline, pipelineString);
+  env->ReleaseStringUTFChars(rtmp, rtmpString);
 
   return 0;
 }
