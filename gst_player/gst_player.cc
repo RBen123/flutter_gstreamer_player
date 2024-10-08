@@ -68,7 +68,7 @@ void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpUri) {
 
   // Set RTMP sink properties
   g_object_set(rtmpsink, "location", rtmpUri, NULL);  // Set the RTMP server URL
-  g_object_set(x264enc, "bitrate", 500, "tune", "zerolatency", NULL);
+  g_object_set(x264enc, "bitrate", 500, NULL);
   g_object_set(flvmux, "streamable", true, NULL);
 
   // Get the existing sink (AppSink)
