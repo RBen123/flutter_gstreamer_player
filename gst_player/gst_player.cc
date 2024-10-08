@@ -135,7 +135,7 @@ void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpString) {
   // Set properties
   g_object_set(udpsrc, "port", 53262, NULL);
   g_object_set(appsink, "sync", FALSE, "max-buffers", 1, "drop", TRUE, NULL);
-  g_object_set(rtmpsink, "location", rtmpUri, NULL);
+  g_object_set(rtmpsink, "location", rtmpString, NULL);
   g_object_set(x264enc, "bitrate", 500, NULL);
   g_object_set(flvmux, "streamable", TRUE, NULL);
 
@@ -151,16 +151,24 @@ void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpString) {
   gst_element_link(avdec, videoconvert);
   gst_element_link(videoconvert, tee);
 
-  // Link tee to appsink and RTMP sink
-  GstPad* tee_src_pad1 = gst_element_get_request_pad(tee, "src_%u");
-  gst_pad_link(tee_src_pad1, queue1);
+  // Link the tee to appsink and rtmpsink
+  GstPad *tee_src_pad1 = gst_element_get_request_pad(tee, "src_0");
+  GstPad *tee_src_pad2 = gst_element_get_request_pad(tee, "src_1");
   gst_element_link(queue1, appsink);
-
-  GstPad* tee_src_pad2 = gst_element_get_request_pad(tee, "src_%u");
-  gst_pad_link(tee_src_pad2, queue2);
   gst_element_link(queue2, x264enc);
   gst_element_link(x264enc, flvmux);
   gst_element_link(flvmux, rtmpsink);
+
+  // Link the tee's source pads to the queues
+  if (gst_pad_link(tee_src_pad1, gst_element_get_static_pad(queue1, "sink")) != GST_PAD_LINK_OK) {
+    g_printerr("Error: Failed to link tee src pad 1 to queue 1 sink pad.\n");
+    return;
+  }
+
+  if (gst_pad_link(tee_src_pad2, gst_element_get_static_pad(queue2, "sink")) != GST_PAD_LINK_OK) {
+    g_printerr("Error: Failed to link tee src pad 2 to queue 2 sink pad.\n");
+    return;
+  }
 
   // Set appsink to emit signals
   sink_ = appsink;
