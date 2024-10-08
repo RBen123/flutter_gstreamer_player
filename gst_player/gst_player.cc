@@ -105,81 +105,66 @@ void GstPlayer::onVideo(VideoFrameCallback callback) {
 //}
 
 void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpUri) {
+  // Store the pipeline string
   pipelineString_ = pipelineString;
 
-  // Check and free previous playing GStreamers if any
-  if (sink_ != nullptr || pipeline != nullptr) {
-    freeGst();
+  // Free previous pipeline if any
+  if (pipeline != nullptr || sink_ != nullptr) {
+    freeGst();  // Frees any previously playing pipelines
   }
 
   // Create the pipeline from the provided pipeline string
   pipeline = gst_parse_launch(pipelineString_.c_str(), nullptr);
 
-  // Create the necessary GStreamer elements
-  GstElement *tee = gst_element_factory_make("tee", "tee");
-  GstElement *queue1 = gst_element_factory_make("queue", "queue1");
-  GstElement *queue2 = gst_element_factory_make("queue", "queue2");
-  GstElement *x264enc = gst_element_factory_make("x264enc", "encoder");
-  GstElement *flvmux = gst_element_factory_make("flvmux", "muxer");
-  GstElement *rtmpsink = gst_element_factory_make("rtmpsink", "rtmpsink");
+  // Create the necessary GStreamer elements for RTMP
+  GstElement *tee = gst_element_factory_make("tee", "tee");  // Tee to split the stream
+  GstElement *queue1 = gst_element_factory_make("queue", "queue1");  // Queue for AppSink
+  GstElement *queue2 = gst_element_factory_make("queue", "queue2");  // Queue for RTMP Sink
+  GstElement *x264enc = gst_element_factory_make("x264enc", "encoder");  // Encoder for RTMP
+  GstElement *flvmux = gst_element_factory_make("flvmux", "muxer");  // Muxer for RTMP
+  GstElement *rtmpsink = gst_element_factory_make("rtmpsink", "rtmpsink");  // RTMP output
 
-  if (!tee || !queue1 || !queue2 || !x264enc || !flvmux || !rtmpsink) {
-    g_printerr("Not all elements could be created.\n");
-    return;
-  }
+  // Set the RTMP properties
+  g_object_set(rtmpsink, "location", rtmpUri, NULL);  // Set RTMP server location
+  g_object_set(x264enc, "bitrate", 500, "tune", "zerolatency", NULL);  // Encoder settings
+  g_object_set(flvmux, "streamable", TRUE, NULL);  // Set FLV muxer to streamable
 
-  // Set RTMP sink properties
-  g_object_set(rtmpsink, "location", rtmpUri, NULL);
-  g_object_set(x264enc, "bitrate", 500, NULL);
-  g_object_set(flvmux, "streamable", TRUE, NULL);
-
-  // Get the existing sink (AppSink)
+  // Get the existing sink (AppSink) from the pipeline
   sink_ = gst_bin_get_by_name(GST_BIN(pipeline), "sink");
+
+  // Set up the appsink to emit signals and connect a sample callback
   gst_app_sink_set_emit_signals(GST_APP_SINK(sink_), TRUE);
-  g_signal_connect(sink_, "new-sample", G_CALLBACK(newSample), (gpointer)this);
+  g_signal_connect(sink_, "new-sample", G_CALLBACK(on_new_sample), (gpointer)this);
 
   // Add new elements (tee, queues, rtmpsink) to the pipeline
   gst_bin_add_many(GST_BIN(pipeline), tee, queue1, queue2, x264enc, flvmux, rtmpsink, NULL);
 
-  // Create dynamic pads for the tee
+  // Link the elements in the RTMP branch
+  if (!gst_element_link_many(queue2, x264enc, flvmux, rtmpsink, NULL)) {
+    g_printerr("Failed to link RTMP branch elements.\n");
+    return;
+  }
+
+  // Link the appsink branch
+  if (!gst_element_link_many(queue1, sink_, NULL)) {
+    g_printerr("Failed to link appsink branch elements.\n");
+    return;
+  }
+
+  // Create pads for the tee element to link both branches
   GstPad *tee_src_pad1 = gst_element_get_request_pad(tee, "src_%u");
   GstPad *tee_src_pad2 = gst_element_get_request_pad(tee, "src_%u");
 
-  if (!tee_src_pad1 || !tee_src_pad2) {
-    g_printerr("Tee request pads failed.\n");
-    return;
-  }
-
-  // Create a ghost pad from the source pad of the pipeline to tee
-  GstElement *source = gst_bin_get_by_name(GST_BIN(pipeline), "source");
+  // Link the source pad of the pipeline to the tee
+  GstElement *source = gst_bin_get_by_name(GST_BIN(pipeline), "udpsrc");
   GstPad *source_pad = gst_element_get_static_pad(source, "src");
   GstPad *tee_sink_pad = gst_element_get_static_pad(tee, "sink");
 
-  if (gst_pad_link(source_pad, tee_sink_pad) != GST_PAD_LINK_OK) {
-    g_printerr("Failed to link source to tee.\n");
-    return;
-  }
+  gst_pad_link(source_pad, tee_sink_pad);  // Link source to tee
+  gst_pad_link(tee_src_pad1, gst_element_get_static_pad(queue1, "sink"));  // Tee to queue1 (appsink)
+  gst_pad_link(tee_src_pad2, gst_element_get_static_pad(queue2, "sink"));  // Tee to queue2 (rtmpsink)
 
-  // Link the tee to the AppSink and RTMP sink branches
-  if (gst_pad_link(tee_src_pad1, gst_element_get_static_pad(queue1, "sink")) != GST_PAD_LINK_OK) {
-    g_printerr("Failed to link tee to queue1.\n");
-    return;
-  }
-  if (gst_element_link(queue1, sink_) != TRUE) {
-    g_printerr("Failed to link queue1 to AppSink.\n");
-    return;
-  }
-
-  if (gst_pad_link(tee_src_pad2, gst_element_get_static_pad(queue2, "sink")) != GST_PAD_LINK_OK) {
-    g_printerr("Failed to link tee to queue2.\n");
-    return;
-  }
-  if (gst_element_link_many(queue2, x264enc, flvmux, rtmpsink, NULL) != TRUE) {
-    g_printerr("Failed to link RTMP branch.\n");
-    return;
-  }
-
-  // Set the pipeline to the playing state
+  // Set the pipeline to PLAYING state
   gst_element_set_state(pipeline, GST_STATE_PLAYING);
 }
 
