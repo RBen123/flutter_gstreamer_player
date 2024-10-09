@@ -4,11 +4,13 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter_gstreamer_player/flutter_gstreamer_player.dart';
 
 void main() {
-  runApp(const MyApp());
+  runApp(MyApp());
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  MyApp({Key? key}) : super(key: key);
+
+  String rtmp = "rtmp://";
 
   Widget initMultipleGstPlayer(List<String> pipelines) {
     // Try this: https://stackoverflow.com/a/66421214
@@ -21,13 +23,13 @@ class MyApp extends StatelessWidget {
               Expanded(
                 child: GstPlayer(
                   pipeline: pipelines[i],
-                  rtmp: "",
+                  rtmp: rtmp,
                 ),
               ),
               Expanded(
                 child: GstPlayer(
                   pipeline: pipelines[i+1],
-                  rtmp: "",
+                  rtmp: rtmp,
                 ),
               ),
             ],
@@ -44,7 +46,7 @@ class MyApp extends StatelessWidget {
               Expanded(
                 child: GstPlayer(
                   pipeline: pipelines.last,
-                  rtmp: "",
+                  rtmp: rtmp,
                 ),
               ),
             ],
@@ -68,50 +70,15 @@ class MyApp extends StatelessWidget {
       case (TargetPlatform.linux):
       case (TargetPlatform.android):
         pipelines.addAll([
-          '''rtspsrc location=
-              rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4 !
-            decodebin !
-            videoconvert !
-            video/x-raw,format=RGBA !
-            appsink name=sink''',
-          '''rtspsrc location=
-              rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4 !
-            decodebin !
-            videoconvert !
-            video/x-raw,format=RGBA !
-            appsink name=sink''',
-          '''rtspsrc location=
-              rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4 !
-            decodebin !
-            videoconvert !
-            video/x-raw,format=RGBA !
-            appsink name=sink''',
-          '''rtspsrc location=
-              rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4 !
-            decodebin !
-            videoconvert !
-            video/x-raw,format=RGBA !
-            appsink name=sink''',
+          //'''udpsrc port=53262 ! application/x-rtp,encoding-name=H264,payload=96 ! rtph264depay ! avdec_h264 ! videoconvert ! video/x-raw,format=RGBA ! appsink name=sink sync=FALSE max-buffers=1 drop=TRUE''',
+    '''udpsrc port=53262 ! application/x-rtp,encoding-name=H264,payload=96 ! rtph264depay ! avdec_h264 ! tee name=t "
+        "t. ! queue ! videoconvert ! video/x-raw,format=RGBA ! appsink name=sink sync=FALSE max-buffers=1 drop=TRUE "
+        "t. ! queue ! x264enc bitrate=500 tune=zerolatency ! flvmux streamable=true ! rtmpsink name=rtmpsink location=\"rtmp://your_rtmp_server\"'''
         ]);
         break;
       case (TargetPlatform.iOS):
         pipelines.addAll([
-          '''rtspsrc location=
-              rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4 !
-            decodebin !
-            glimagesink''',
-          '''rtspsrc location=
-              rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4 !
-            decodebin !
-            glimagesink''',
-          '''rtspsrc location=
-              rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4 !
-            decodebin !
-            glimagesink''',
-          '''rtspsrc location=
-              rtsp://wowzaec2demo.streamlock.net/vod/mp4:BigBuckBunny_115k.mp4 !
-            decodebin !
-            glimagesink''',
+          '''udpsrc port=53262 ! application/x-rtp,encoding-name=H264,payload=96 ! rtph264depay ! avdec_h264 ! videoconvert ! video/x-raw,format=RGBA ! appsink name=sink sync=FALSE max-buffers=1 drop=TRUE''',
         ]);
         break;
       default:
