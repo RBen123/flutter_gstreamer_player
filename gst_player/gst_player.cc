@@ -153,7 +153,7 @@ void GstPlayer::play(const gchar *pipelineString, const gchar *rtmpString) {
                                         NULL);
 
     // Link the udpsrc to the next element with the RTP caps
-    if (!gst_element_link_filtered(udpsrc, rtph264depay, caps)) {
+    if (!gst_element_link_filtered(udpsrc, rtpdepay, caps)) {
         g_printerr("Error: Could not link udpsrc to rtph264depay with caps filter.\n");
         gst_object_unref(pipeline);
         return;
