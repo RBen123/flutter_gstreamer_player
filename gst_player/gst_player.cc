@@ -160,7 +160,7 @@ void GstPlayer::play(const gchar *pipelineString, const gchar *rtmpString) {
         return;
     }
 
-    if (!gst_element_link_filtered(videoconvert, capsRGBA)) {
+    if (!gst_element_link_filtered(avdec, videoconvert, capsRGBA)) {
         g_printerr("Error: Could not link videoconvert with caps filter.\n");
         gst_object_unref(pipeline);
         return;
