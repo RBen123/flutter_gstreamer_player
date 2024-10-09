@@ -151,6 +151,7 @@ void GstPlayer::play(const gchar *pipelineString, const gchar *rtmpString) {
                                         "encoding-name", G_TYPE_STRING, "H264",
                                         "payload", G_TYPE_INT, 96,
                                         NULL);
+    GstCaps *capsRGBA= gst_caps_new_simple("video/x-raw", "format", G_TYPE_STRING, "RGBA", NULL);
 
     // Link the udpsrc to the next element with the RTP caps
     if (!gst_element_link_filtered(udpsrc, rtpdepay, caps)) {
@@ -159,8 +160,15 @@ void GstPlayer::play(const gchar *pipelineString, const gchar *rtmpString) {
         return;
     }
 
+    if (!gst_element_link_filtered(videoconvert, capsRGBA)) {
+        g_printerr("Error: Could not link videoconvert with caps filter.\n");
+        gst_object_unref(pipeline);
+        return;
+    }
+
     // Free the caps after linking
     gst_caps_unref(caps);
+    gst_caps_unref(capsRGBA);
 
     // Link the elements
     gst_element_link(udpsrc, rtpdepay);
