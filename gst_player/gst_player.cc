@@ -243,9 +243,9 @@ void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpString) {
 
 void GstPlayer::freeGst(void) {
     gst_element_set_state(pipeline, GST_STATE_NULL);
+    g_signal_handlers_disconnect_by_func(sink_, G_CALLBACK(newSample), this);
     gst_object_unref(sink_);
     gst_object_unref(pipeline);
-    g_signal_handlers_disconnect_by_func(sink_, G_CALLBACK(newSample), this);
 }
 
 GstFlowReturn GstPlayer::newSample(GstAppSink *sink, gpointer gSelf) {
