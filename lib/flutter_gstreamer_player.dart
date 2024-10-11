@@ -59,7 +59,6 @@ class _GstPlayerState extends State<GstPlayer> {
   }
 
   Future<Null> initializeController() async {
-    await _controller.dispose();
     await _controller.initialize(
       widget.pipeline,
       widget.rtmp
