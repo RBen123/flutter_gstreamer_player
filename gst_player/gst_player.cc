@@ -32,9 +32,9 @@ void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpString) {
   pipelineString_ = pipelineString;
 
   // Check and free previous playing GStreamers if any
-  //if (sink_ != nullptr || pipeline != nullptr) {
+  if (sink_ != nullptr || pipeline != nullptr) {
     freeGst();
-  //}
+  }
 
   pipeline = gst_parse_launch(
        pipelineString_.c_str(),
@@ -245,6 +245,7 @@ void GstPlayer::freeGst(void) {
     gst_element_set_state(pipeline, GST_STATE_NULL);
     gst_object_unref(sink_);
     gst_object_unref(pipeline);
+    g_signal_handlers_disconnect_by_func(sink_, G_CALLBACK(newSample), this);
 }
 
 GstFlowReturn GstPlayer::newSample(GstAppSink *sink, gpointer gSelf) {
