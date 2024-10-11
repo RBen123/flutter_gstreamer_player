@@ -53,13 +53,13 @@ class _GstPlayerState extends State<GstPlayer> {
   @override
   Future<void> didUpdateWidget(GstPlayer oldWidget) async {
     if (widget.pipeline != oldWidget.pipeline) {
-      await _controller.dispose();
       initializeController();
     }
     super.didUpdateWidget(oldWidget);
   }
 
   Future<Null> initializeController() async {
+    await _controller.dispose();
     await _controller.initialize(
       widget.pipeline,
       widget.rtmp
