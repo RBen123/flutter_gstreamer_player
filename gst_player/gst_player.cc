@@ -28,63 +28,63 @@ void GstPlayer::onVideo(VideoFrameCallback callback) {
     video_callback_ = callback;
 }
 
-//void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpString) {
-//  pipelineString_ = pipelineString;
-//
-//  // Check and free previous playing GStreamers if any
-//  if (sink_ != nullptr || pipeline != nullptr) {
-//    freeGst();
-//  }
-//
-//  pipeline = gst_parse_launch(
-//       pipelineString_.c_str(),
-//      nullptr);
-//
-//  sink_ = gst_bin_get_by_name(GST_BIN(pipeline), "sink");
-//  gst_app_sink_set_emit_signals(GST_APP_SINK(sink_), TRUE);
-//  g_signal_connect(sink_, "new-sample", G_CALLBACK(newSample), (gpointer)this);
-//
-//  gst_element_set_state(pipeline, GST_STATE_PLAYING);
-//}
-
 void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpString) {
-    // Check and free previous playing GStreamers if any
-    if (sink_ != nullptr || pipeline != nullptr) {
-        freeGst();
-    }
+  pipelineString_ = pipelineString;
 
-    // Create the pipeline using the provided pipeline string
-    pipeline = gst_parse_launch(pipelineString, nullptr);
-    if (!pipeline) {
-        g_printerr("Failed to create pipeline from string.\n");
-        return;
-    }
+  // Check and free previous playing GStreamers if any
+  if (sink_ != nullptr || pipeline != nullptr) {
+    freeGst();
+  }
 
-    // Get the appsink element
-    sink_ = gst_bin_get_by_name(GST_BIN(pipeline), "sink");
-    if (!sink_) {
-        g_printerr("Failed to get appsink element from pipeline.\n");
-        gst_object_unref(pipeline);
-        return;
-    }
+  pipeline = gst_parse_launch(
+       pipelineString_.c_str(),
+      nullptr);
 
-    // Set properties for appsink
-    gst_app_sink_set_emit_signals(GST_APP_SINK(sink_), TRUE);
-    g_signal_connect(sink_, "new-sample", G_CALLBACK(newSample), (gpointer)this);
+  sink_ = gst_bin_get_by_name(GST_BIN(pipeline), "sink");
+  gst_app_sink_set_emit_signals(GST_APP_SINK(sink_), TRUE);
+  g_signal_connect(sink_, "new-sample", G_CALLBACK(newSample), (gpointer)this);
 
-    // Get the rtmpsink element and set its properties
-    GstElement *rtmpsink = gst_bin_get_by_name(GST_BIN(pipeline), "rtmpsink");
-    if (rtmpsink) {
-        g_object_set(rtmpsink, "location", rtmpString, NULL);  // Set the RTMP location
-    } else {
-        g_printerr("Failed to get rtmpsink element from pipeline.\n");
-        gst_object_unref(pipeline);
-        return;
-    }
-
-    // Start playing the pipeline
-    gst_element_set_state(pipeline, GST_STATE_PLAYING);
+  gst_element_set_state(pipeline, GST_STATE_PLAYING);
 }
+
+//void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpString) {
+//    // Check and free previous playing GStreamers if any
+//    if (sink_ != nullptr || pipeline != nullptr) {
+//        freeGst();
+//    }
+//
+//    // Create the pipeline using the provided pipeline string
+//    pipeline = gst_parse_launch(pipelineString, nullptr);
+//    if (!pipeline) {
+//        g_printerr("Failed to create pipeline from string.\n");
+//        return;
+//    }
+//
+//    // Get the appsink element
+//    sink_ = gst_bin_get_by_name(GST_BIN(pipeline), "sink");
+//    if (!sink_) {
+//        g_printerr("Failed to get appsink element from pipeline.\n");
+//        gst_object_unref(pipeline);
+//        return;
+//    }
+//
+//    // Set properties for appsink
+//    gst_app_sink_set_emit_signals(GST_APP_SINK(sink_), TRUE);
+//    g_signal_connect(sink_, "new-sample", G_CALLBACK(newSample), (gpointer)this);
+//
+//    // Get the rtmpsink element and set its properties
+//    GstElement *rtmpsink = gst_bin_get_by_name(GST_BIN(pipeline), "rtmpsink");
+//    if (rtmpsink) {
+//        g_object_set(rtmpsink, "location", rtmpString, NULL);  // Set the RTMP location
+//    } else {
+//        g_printerr("Failed to get rtmpsink element from pipeline.\n");
+//        gst_object_unref(pipeline);
+//        return;
+//    }
+//
+//    // Start playing the pipeline
+//    gst_element_set_state(pipeline, GST_STATE_PLAYING);
+//}
 
 //void GstPlayer::play(const gchar *pipelineString, const gchar *rtmpString) {
 //    pipelineString_ = pipelineString;
