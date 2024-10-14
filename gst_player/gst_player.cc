@@ -39,14 +39,14 @@ void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpString) {
     // Create new pipeline
     pipeline = gst_parse_launch(pipelineString_.c_str(), nullptr);
     if (!pipeline) {
-        std::cerr << "Failed to create pipeline." << std::endl;
+        g_printerr("Failed to create pipeline.");
         return;
     }
 
     // Get the sink element (assuming the sink is named "sink" in the pipeline)
     sink_ = gst_bin_get_by_name(GST_BIN(pipeline), "sink");
     if (!sink_) {
-        std::cerr << "Failed to get sink element from pipeline." << std::endl;
+        g_printerr("Failed to get sink element from pipeline.");
         freeGst(); // Clean up if there's an error
         return;
     }
@@ -59,7 +59,7 @@ void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpString) {
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
     GstStateChangeReturn ret = gst_element_get_state(pipeline, nullptr, nullptr, GST_CLOCK_TIME_NONE);
     if (ret != GST_STATE_CHANGE_SUCCESS) {
-        std::cerr << "Failed to set pipeline to PLAYING state." << std::endl;
+        g_printerr("Failed to set pipeline to PLAYING state.");
         freeGst();
     }
 }
