@@ -53,7 +53,7 @@ void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpString) {
 
     // Connect the new-sample signal to the sink
     gst_app_sink_set_emit_signals(GST_APP_SINK(sink_), TRUE);
-    g_signal_connect(sink_, "new-sample", G_CALLBACK(newSample), (gpointer)this);
+    g_signal_connect(sink_, "new-sample", G_CALLBACK(newSample), this);
 
     // Set the pipeline to PLAYING state and wait for the transition
     gst_element_set_state(pipeline, GST_STATE_NULL);
@@ -288,7 +288,14 @@ void GstPlayer::freeGst(void) {
         // Unref the sink and pipeline
         if (sink_ != nullptr) {
             // Disconnect signal handler
-            g_signal_handlers_disconnect_by_func(sink_, G_CALLBACK(newSample), (gpointer)this);
+            g_signal_handlers_disconnect_matched(
+                    sink_,                          // The object where the signal is connected
+                    G_SIGNAL_MATCH_FUNC | G_SIGNAL_MATCH_DATA,  // Match both function and data
+                    0,                              // Signal ID (0 for any)
+                    0,                              // Detail (0 for any)
+                    G_CALLBACK(newSample),          // The function callback to disconnect
+                    this                            // The data pointer (must match the original)
+            );
 
             gst_object_unref(sink_);
             sink_ = nullptr;
