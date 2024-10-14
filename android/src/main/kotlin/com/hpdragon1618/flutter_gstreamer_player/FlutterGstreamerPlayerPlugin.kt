@@ -22,6 +22,7 @@ class FlutterGstreamerPlayerPlugin: FlutterPlugin, MethodCallHandler {
   /// This local reference serves to register the plugin with the Flutter Engine and unregister it
   /// when the Flutter Engine is detached from the Activity
   private lateinit var channel : MethodChannel
+  private var surface: Surface? = null
 
   private var entries: MutableList<TextureRegistry.SurfaceTextureEntry> = mutableListOf()
 
@@ -61,8 +62,10 @@ class FlutterGstreamerPlayerPlugin: FlutterPlugin, MethodCallHandler {
       entries.add(registry.createSurfaceTexture())
       var surfaceTexture = entries[entries.lastIndex].surfaceTexture()
       var textureID = entries[entries.lastIndex].id().toInt();
-
-      var surface = Surface(surfaceTexture)
+      if(surface != null) {
+        surface.release();
+      }
+      surface = Surface(surfaceTexture)
 
       handlePlayerRegisterTexture(pipeline, rtmp, player_id, surface);
 
