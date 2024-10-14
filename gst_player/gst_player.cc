@@ -56,6 +56,7 @@ void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpString) {
     g_signal_connect(sink_, "new-sample", G_CALLBACK(newSample), (gpointer)this);
 
     // Set the pipeline to PLAYING state and wait for the transition
+    gst_element_set_state(pipeline, GST_STATE_PAUSED);
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
 //    GstStateChangeReturn ret = gst_element_get_state(pipeline, nullptr, nullptr, GST_CLOCK_TIME_NONE);
 //    if (ret != GST_STATE_CHANGE_SUCCESS) {
