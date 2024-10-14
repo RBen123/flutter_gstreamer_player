@@ -63,11 +63,11 @@ class FlutterGstreamerPlayerPlugin: FlutterPlugin, MethodCallHandler {
       var surfaceTexture = entries[entries.lastIndex].surfaceTexture()
       var textureID = entries[entries.lastIndex].id().toInt();
       if(surface != null) {
-        surface.release();
+        surface?.release();
       }
       surface = Surface(surfaceTexture)
 
-      handlePlayerRegisterTexture(pipeline, rtmp, player_id, surface);
+      handlePlayerRegisterTexture(pipeline, rtmp, player_id, surface!!);
 
       result.success(textureID);
     } else {
