@@ -289,7 +289,7 @@ void GstPlayer::freeGst(void) {
         // Unref the sink and pipeline
         //if (sink_ != nullptr) {
             // Disconnect signal handler
-            g_signal_handlers_disconnect_by_data(sink_, (gpointer)this);
+            //g_signal_handlers_disconnect_by_data(sink_, (gpointer)this);
 
             gst_object_unref(sink_);
             sink_ = nullptr;
