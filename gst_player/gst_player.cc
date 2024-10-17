@@ -59,6 +59,7 @@ void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpString) {
     gst_element_set_state(pipeline, GST_STATE_NULL);
     gst_element_set_state(pipeline, GST_STATE_PAUSED);
     gst_element_set_state(pipeline, GST_STATE_PLAYING);
+    g_printerr("start playing.");
 //    GstStateChangeReturn ret = gst_element_get_state(pipeline, nullptr, nullptr, GST_CLOCK_TIME_NONE);
 //    if (ret != GST_STATE_CHANGE_SUCCESS) {
 //        g_printerr("Failed to set pipeline to PLAYING state.");
@@ -292,10 +293,12 @@ void GstPlayer::freeGst(void) {
 
             gst_object_unref(sink_);
             sink_ = nullptr;
+            g_printerr("free sink");
         //}
 
         gst_object_unref(pipeline);
         pipeline = nullptr;
+        g_printerr("free pipeline");
     //}
 }
 
