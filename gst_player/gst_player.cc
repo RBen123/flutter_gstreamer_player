@@ -28,64 +28,64 @@ void GstPlayer::onVideo(VideoFrameCallback callback) {
     video_callback_ = callback;
 }
 
-void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpString) {
-    pipelineString_ = pipelineString;
-
-    // Check and free previous playing GStreamers if any
-    //if (sink_ != nullptr || pipeline != nullptr) {
-        freeGst();
-    //}
-
-    // Create new pipeline
-    pipeline = gst_parse_launch(pipelineString_.c_str(), nullptr);
-    if (!pipeline) {
-        g_printerr("Failed to create pipeline.");
-        return;
-    }
-
-    // Get the sink element (assuming the sink is named "sink" in the pipeline)
-    sink_ = gst_bin_get_by_name(GST_BIN(pipeline), "sink");
-    if (!sink_) {
-        g_printerr("Failed to get sink element from pipeline.");
-        freeGst(); // Clean up if there's an error
-        return;
-    }
-
-    // Connect the new-sample signal to the sink
-    gst_app_sink_set_emit_signals(GST_APP_SINK(sink_), TRUE);
-    g_signal_connect(sink_, "new-sample", G_CALLBACK(newSample), (gpointer)this);
-
-    // Set the pipeline to PLAYING state and wait for the transition
-    gst_element_set_state(pipeline, GST_STATE_NULL);
-    gst_element_set_state(pipeline, GST_STATE_PAUSED);
-    gst_element_set_state(pipeline, GST_STATE_PLAYING);
-    g_printerr("start playing.");
-//    GstStateChangeReturn ret = gst_element_get_state(pipeline, nullptr, nullptr, GST_CLOCK_TIME_NONE);
-//    if (ret != GST_STATE_CHANGE_SUCCESS) {
-//        g_printerr("Failed to set pipeline to PLAYING state.");
-//        freeGst();
-//    }
-}
-
-
 //void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpString) {
-//  pipelineString_ = pipelineString;
+//    pipelineString_ = pipelineString;
 //
-//  // Check and free previous playing GStreamers if any
-//  if (sink_ != nullptr || pipeline != nullptr) {
-//    freeGst();
-//  }
+//    // Check and free previous playing GStreamers if any
+//    //if (sink_ != nullptr || pipeline != nullptr) {
+//        freeGst();
+//    //}
 //
-//  pipeline = gst_parse_launch(
-//       pipelineString_.c_str(),
-//      nullptr);
+//    // Create new pipeline
+//    pipeline = gst_parse_launch(pipelineString_.c_str(), nullptr);
+//    if (!pipeline) {
+//        g_printerr("Failed to create pipeline.");
+//        return;
+//    }
 //
-//  sink_ = gst_bin_get_by_name(GST_BIN(pipeline), "sink");
-//  gst_app_sink_set_emit_signals(GST_APP_SINK(sink_), TRUE);
-//  g_signal_connect(sink_, "new-sample", G_CALLBACK(newSample), (gpointer)this);
+//    // Get the sink element (assuming the sink is named "sink" in the pipeline)
+//    sink_ = gst_bin_get_by_name(GST_BIN(pipeline), "sink");
+//    if (!sink_) {
+//        g_printerr("Failed to get sink element from pipeline.");
+//        freeGst(); // Clean up if there's an error
+//        return;
+//    }
 //
-//  gst_element_set_state(pipeline, GST_STATE_PLAYING);
+//    // Connect the new-sample signal to the sink
+//    gst_app_sink_set_emit_signals(GST_APP_SINK(sink_), TRUE);
+//    g_signal_connect(sink_, "new-sample", G_CALLBACK(newSample), (gpointer)this);
+//
+//    // Set the pipeline to PLAYING state and wait for the transition
+//    gst_element_set_state(pipeline, GST_STATE_NULL);
+//    gst_element_set_state(pipeline, GST_STATE_PAUSED);
+//    gst_element_set_state(pipeline, GST_STATE_PLAYING);
+//    g_printerr("start playing.");
+////    GstStateChangeReturn ret = gst_element_get_state(pipeline, nullptr, nullptr, GST_CLOCK_TIME_NONE);
+////    if (ret != GST_STATE_CHANGE_SUCCESS) {
+////        g_printerr("Failed to set pipeline to PLAYING state.");
+////        freeGst();
+////    }
 //}
+
+
+void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpString) {
+  pipelineString_ = pipelineString;
+
+  // Check and free previous playing GStreamers if any
+  if (sink_ != nullptr || pipeline != nullptr) {
+    freeGst();
+  }
+
+  pipeline = gst_parse_launch(
+       pipelineString_.c_str(),
+      nullptr);
+
+  sink_ = gst_bin_get_by_name(GST_BIN(pipeline), "sink");
+  gst_app_sink_set_emit_signals(GST_APP_SINK(sink_), TRUE);
+  g_signal_connect(sink_, "new-sample", G_CALLBACK(newSample), (gpointer)this);
+
+  gst_element_set_state(pipeline, GST_STATE_PLAYING);
+}
 
 //void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpString) {
 //    // Check and free previous playing GStreamers if any
@@ -281,33 +281,33 @@ void GstPlayer::play(const gchar* pipelineString, const gchar* rtmpString) {
 //    gst_element_set_state(pipeline, GST_STATE_PLAYING);
 //}
 
-void GstPlayer::freeGst(void) {
-    //if (pipeline != nullptr) {
-        // Stop the pipeline
-        gst_element_set_state(pipeline, GST_STATE_NULL);
-
-        // Unref the sink and pipeline
-        //if (sink_ != nullptr) {
-            // Disconnect signal handler
-            //g_signal_handlers_disconnect_by_data(sink_, (gpointer)this);
-
-            gst_object_unref(sink_);
-            sink_ = nullptr;
-            g_printerr("free sink");
-        //}
-
-        gst_object_unref(pipeline);
-        pipeline = nullptr;
-        g_printerr("free pipeline");
-    //}
-}
-
-
 //void GstPlayer::freeGst(void) {
-//    gst_element_set_state(pipeline, GST_STATE_NULL);
-//    gst_object_unref(sink_);
-//    gst_object_unref(pipeline);
+//    //if (pipeline != nullptr) {
+//        // Stop the pipeline
+//        gst_element_set_state(pipeline, GST_STATE_NULL);
+//
+//        // Unref the sink and pipeline
+//        //if (sink_ != nullptr) {
+//            // Disconnect signal handler
+//            //g_signal_handlers_disconnect_by_data(sink_, (gpointer)this);
+//
+//            gst_object_unref(sink_);
+//            sink_ = nullptr;
+//            g_printerr("free sink");
+//        //}
+//
+//        gst_object_unref(pipeline);
+//        pipeline = nullptr;
+//        g_printerr("free pipeline");
+//    //}
 //}
+
+
+void GstPlayer::freeGst(void) {
+    gst_element_set_state(pipeline, GST_STATE_NULL);
+    gst_object_unref(sink_);
+    gst_object_unref(pipeline);
+}
 
 GstFlowReturn GstPlayer::newSample(GstAppSink *sink, gpointer gSelf) {
     GstSample *sample = NULL;

@@ -35,7 +35,7 @@ class GstPlayer extends StatefulWidget {
   String pipeline;
   String rtmp;
 
-  GstPlayer({Key? key, required this.pipeline, required this.rtmp}) : super(key: key);
+  GstPlayer({Key? key, required this.pipeline, this.rtmp = ""}) : super(key: key);
 
   @override
   State<GstPlayer> createState() => _GstPlayerState();
