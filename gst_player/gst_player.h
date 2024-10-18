@@ -32,8 +32,10 @@ class GstPlayer {
     GstElement *sink_ = nullptr;
 
     void freeGst(void);
+    void removeRtmpSink();
 
     static GstFlowReturn newSample(GstAppSink *sink, gpointer gSelf);
+    static gboolean onGstBusMessage(GstBus *bus, GstMessage *msg, gpointer user_data);
 };
 
 class GstPlayers {
